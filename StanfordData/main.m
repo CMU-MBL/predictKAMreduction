@@ -1044,19 +1044,9 @@ figure()
 hold on
 
 
-% curve1 = -(mean(KAMreal) + mean(RMSE_KAM));
-% curve2 = -(mean(KAMreal) - mean(RMSE_KAM));
-% x = 1:length(curve1);
-% x2 = [x, fliplr(x)];
-% inbetween = [curve1, fliplr(curve2)];
-% color = [0, 0.1, 0.1];
-% a2 = fill(x2, inbetween, color);
-% a2.FaceAlpha = 0.1;
-% a2.EdgeAlpha = 0;
 p1 = plot(-mean(KAMpred), 'LineWidth', 2);
 p2 = plot(-mean(KAMreal), '--', 'LineWidth', 2);
-%p2 = plot(b, '--', 'LineWidth', 2);
-%p3 = plot(a, '-.', 'LineWidth', 2);
+
 p3 = plot(-mean(KAMbaseline), '-.', 'LineWidth', 2);
 
 p1.Color = [0 0 0];
@@ -1209,13 +1199,6 @@ for leftout=1:1:12
     plot(  (-KM(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100*9.8))*100)
     KAM_fda(leftout,:) =  (-KM(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100*9.8))*100;
     
-    %     %
-    %      figure()
-    %    % subplot(4,3,[1:3])
-    %     KM = cross(pred_cop_l - pred_grf, pred_kjc_l - pred_grf);
-    %     plot(KM(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)));
-    %     hold on
-    
     
     
     
@@ -1230,12 +1213,10 @@ for leftout=1:1:12
     real_shank_g = real_shank + real_pelvis;
     real_kjc_l = real_kjc_g - real_shank_g;
     real_cop_l = [real_cop_g(1,:) - real_shank_g(1,:); real_cop_g(2,:) - real_shank_g(2,:); zeros(1,100)];
-    
-    %     KM2 = cross(real_cop_l - real_grf, real_kjc_l - real_grf);
-    %     plot(KM2(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)));
+
     r = real_cop_g/1000 - real_kjc_g/1000;
     KM2 = cross(r, real_grf);
-    %plot(-KM2(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100)*10)
+
     plot(  (-KM2(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100*9.8))*100)
     KAM_toein(leftout,:) = (-KM2(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100*9.8))*100;
     
@@ -1255,8 +1236,7 @@ for leftout=1:1:12
     KM3 = cross(r, base_grf);
     plot((-KM3(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100*9.8))*100)
     KAM_base(leftout,:) = (-KM3(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100*9.8))*100;
-    %     KM3 = cross(base_cop_l - base_grf, base_kjc_l - base_grf);
-    %     plot(KM3(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)));
+
     legend('linreg predicted toe-in KAM', 'FDA predicted toe-in KAM', 'real toe-in KAM', 'baseline KAM');
     xlabel('% stance')
     ylabel('KAM [%BW*H]')
@@ -1274,197 +1254,10 @@ plot(mean(KAM_lin), 'LineWidth', 2)
 plot(mean(KAM_fda), 'LineWidth', 2)
 legend('toe in', 'baseline', 'linreg', 'fda')
 
-%% 05.26.21 try fitting regressions to spline coefficients
 
-load('KJCy_FDA.mat')
-load('KJCx_FDA.mat')
-load('COPy_FDA.mat')
-load('COPx_FDA.mat')
-shape=10;
-leftout=12;
-y_FDA_KJC = zeros(shape,100);
-x_FDA_KJC = zeros(shape,100);
-
-y_FDA_COP = zeros(shape,100);
-x_FDA_COP = zeros(shape,100);
-
-for ii = 1:1:100
-    
-    mdl = fitlm(linspace(1,shape,shape), KJCy_offset(:,ii));
-    y_FDA_KJC(:, ii) = mdl.Fitted;
-    y_FDA_KJC_R2(leftout,ii) = mdl.Rsquared.Ordinary;
-    
-    mdl = fitlm(linspace(1,shape,shape), KJCx_offset(:,ii));
-    x_FDA_KJC(:, ii) = mdl.Fitted;
-    x_FDA_KJC_R2(leftout,ii) = mdl.Rsquared.Ordinary;
-    
-    
-    mdl = fitlm(linspace(1,shape,shape), COPy_offset(:,ii));
-    y_FDA_COP(:, ii) = mdl.Fitted;
-    y_FDA_COP_R2(leftout,ii) = mdl.Rsquared.Ordinary;
-    
-    mdl = fitlm(linspace(1,shape,shape), COPx_offset(:,ii));
-    x_FDA_COP(:, ii) = mdl.Fitted;
-    x_FDA_COP_R2(leftout,ii) = mdl.Rsquared.Ordinary;
-
-    
-    
-end
-
-%% visualize FDA fits (0.6.28.2021)
-figure;
-subplot(1,2,1)
-hold on
-for i = 1:1:10
-    p = plot(KJCy_offset(i,:), 'color', 'k', 'LineWidth', 2);
-    p.Color(4) = i/15;
-    if i == 5
-        p.Color = '#F22300';
-    end
-end
-
-%plot(70*ones(10,1),KJCy_offset(:,70),'.', 'MarkerSize',20, 'color', '#E1AF00');
-%plot(70,KJCy_offset(5,70),'.','MarkerSize',20,'color','#F22300')
-
-
-% subplot(1,3,2)
-% hold on
-% plot(KJCy_offset(:,70),'.', 'MarkerSize',30, 'color', '#E1AF00')
-% plot(5,KJCy_offset(5,70),'.','MarkerSize',30,'color','#F22300')
-% % fit LR
-% [m] = polyfit([1:1:10],KJCy_offset(:,70),1);
-% plot(m(1).*[1:1:10]+m(2), '--','LineWidth', 2, 'color', '#404146')
-
-
-subplot(1,2,2)
-hold on 
-sub = 7;
-fpa = target_FPA(sub);
-p1 = plot(baseline_KJC_y(sub,:), 'color', '#404146', 'LineWidth', 3);
-p1.Color(4) = 0.8;
-p2 = plot(trial_KJC_y(sub,:),':' ,'color', '#3C9AB2', 'LineWidth', 3);
-p2.Color(4) = 0.8;
-p3 = plot(y_pred_KJC(fpa,:)+baseline_KJC_y(sub,:), '-.', 'color', '#F22300', 'LineWidth', 3);
-p3.Color(4) = 0.8;
-
-
-%% and then see how accurate the new preds are
-
-
-target_FPA(6)=10;
-for leftout=1:1:12
-    fpa = target_FPA(leftout);
-    % linreg pred:
-    pred_kjc = [x_pred_KJC(fpa,:); y_pred_KJC(fpa,:); baseline_KJC_z(leftout,:)];
-    pred_cop = [x_pred_COP(fpa,:); y_pred_COP(fpa,:); baseline_COP_z(leftout,:)];
-    pred_shank = [x_pred_shank(fpa,:); y_pred_shank(fpa,:); baseline_shankCM_z(leftout,:)];
-    pred_grf = [baseline_GRF_x(leftout,:); baseline_GRF_y(leftout,:); baseline_GRF_z(leftout,:)];
-    pred_pelvis = [baseline_pelvis_x(leftout,:); baseline_pelvis_y(leftout,:); baseline_pelvis_z(leftout,:)];
-    
-    % add back baseline_XXXX_XXX
-    pred_kjc = [pred_kjc(1,:) + baseline_KJC_x(leftout,:); pred_kjc(2,:) + baseline_KJC_y(leftout,:); pred_kjc(3,:)];
-    pred_cop = [pred_cop(1,:) + baseline_COP_x(leftout,:); pred_cop(2,:) + baseline_COP_y(leftout,:); pred_cop(3,:)];
-    pred_shank = [pred_shank(1,:) + baseline_shankCM_x(leftout,:); pred_shank(2,:) + baseline_shankCM_y(leftout,:); pred_shank(3,:)];
-    
-    % relate all back to global by adding back pelvis
-    pred_kjc_g = pred_kjc + pred_pelvis;
-    pred_cop_g = pred_cop + pred_pelvis;
-    pred_shank_g = pred_shank + pred_pelvis;
-    
-    
-    %%% NROKH DEBUG 08.27.2020
-    figure()
-    hold on
-    r = pred_cop_g/1000 - pred_kjc_g/1000;
-    KM0 = cross(r, pred_grf);
-    %plot(-KM0(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100)*10)
-    plot((-KM0(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100*9.8))*100)
-    KAM_lin(leftout,:) = (-KM0(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100*9.8))*100;
-    
-    % FDA pred:
-    pred_kjc = [x_FDA_KJC(fpa,:) + baseline_KJC_x(leftout,:); y_FDA_KJC(fpa,:) + baseline_KJC_y(leftout,:); pred_kjc(3,:)];
-    pred_cop = [x_FDA_COP(fpa,:) + baseline_COP_x(leftout,:); y_FDA_COP(fpa,:) + baseline_COP_y(leftout,:); pred_cop(3,:)];
-    % relate all back to global by adding back pelvis
-    pred_kjc_g = pred_kjc + pred_pelvis;
-    pred_cop_g = pred_cop + pred_pelvis;
-    pred_shank_g = pred_shank + pred_pelvis;
-    
-    r = pred_cop_g/1000 - pred_kjc_g/1000;
-    KM = cross(r, pred_grf);
-    plot((-KM(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100*9.8))*100)
-    KAM_fda(leftout,:) = (-KM(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100*9.8))*100;
-    
-    %     %
-    %      figure()
-    %    % subplot(4,3,[1:3])
-    %     KM = cross(pred_cop_l - pred_grf, pred_kjc_l - pred_grf);
-    %     plot(KM(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)));
-    %     hold on
-    
-    
-    
-    
-    %%%% COMPARE TO REAL TOE-IN
-    real_kjc = [trial_KJC_x(leftout,:); trial_KJC_y(leftout,:); trial_KJC_z(leftout,:)];
-    real_cop = [trial_COP_x(leftout,:); trial_COP_y(leftout,:); trial_COP_z(leftout,:)];
-    real_shank = [trial_shankCM_x(leftout,:); trial_shankCM_y(leftout,:); trial_shankCM_z(leftout,:)];
-    real_grf = [trial_GRF_x(leftout,:); trial_GRF_y(leftout,:); trial_GRF_z(leftout,:)];
-    real_pelvis = [trial_pelvis_x(leftout,:); trial_pelvis_y(leftout,:); trial_pelvis_z(leftout,:)];
-    real_kjc_g = real_kjc + real_pelvis;
-    real_cop_g = real_cop + real_pelvis;
-    real_shank_g = real_shank + real_pelvis;
-    real_kjc_l = real_kjc_g - real_shank_g;
-    real_cop_l = [real_cop_g(1,:) - real_shank_g(1,:); real_cop_g(2,:) - real_shank_g(2,:); zeros(1,100)];
-    
-    %     KM2 = cross(real_cop_l - real_grf, real_kjc_l - real_grf);
-    %     plot(KM2(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)));
-    r = real_cop_g/1000 - real_kjc_g/1000;
-    KM2 = cross(r, real_grf);
-    %plot(-KM2(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100)*10)
-    plot((-KM2(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100*9.8))*100)
-    KAM_toein(leftout,:) = (-KM2(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100*9.8))*100;
-    
-    %%%% COMPARE TO REAL BASELINE
-    base_kjc = [baseline_KJC_x(leftout,:); baseline_KJC_y(leftout,:); baseline_KJC_z(leftout,:)];
-    base_cop = [baseline_COP_x(leftout,:); baseline_COP_y(leftout,:); baseline_COP_z(leftout,:)];
-    base_shank = [baseline_shankCM_x(leftout,:); baseline_shankCM_y(leftout,:); baseline_shankCM_z(leftout,:)];
-    base_grf = [baseline_GRF_x(leftout,:); baseline_GRF_y(leftout,:); baseline_GRF_z(leftout,:)];
-    base_pelvis = [baseline_pelvis_x(leftout,:); baseline_pelvis_y(leftout,:); baseline_pelvis_z(leftout,:)];
-    base_kjc_g = base_kjc + base_pelvis;
-    base_cop_g = base_cop + base_pelvis;
-    base_shank_g = base_shank + base_pelvis;
-    base_kjc_l = base_kjc_g - base_shank_g;
-    base_cop_l = [base_cop_g(1,:) - base_shank_g(1,:); base_cop_g(2,:) - base_shank_g(2,:); zeros(1,100)];
-    
-    r = base_cop_g/1000 - base_kjc_g/1000;
-    KM3 = cross(r, base_grf);
-    %plot(-KM3(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100)*10)
-    plot((-KM3(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100*9.8))*100)
-    KAM_base(leftout,:) = (-KM3(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)/100*9.8))*100;
-    %     KM3 = cross(base_cop_l - base_grf, base_kjc_l - base_grf);
-    %     plot(KM3(1,:)/(subjectHeightsWeights(leftout,2)*subjectHeightsWeights(leftout,3)));
-    legend('linreg predicted toe-in KAM', 'FDA predicted toe-in KAM', 'real toe-in KAM', 'baseline KAM');
-    xlabel('% stance')
-    ylabel('KAM [%BW*H]')
-    
-    
-    
-   
-end
-
-
-figure()
-hold on
-plot(mean(KAM_toein), 'LineWidth', 2)
-plot(mean(KAM_base), 'LineWidth', 2)
-plot(mean(KAM_lin), 'LineWidth', 2)
-plot(mean(KAM_fda), 'LineWidth', 2)
-legend('toe in', 'baseline', 'linreg', 'fda')
 
 %% LOOCV for spline regression
-% this is really ugly and relies on you running some stuff above but I 
-% can't tell you exactly what, hopefully next time you see this you have 
-% the strength to rewrite it to make it less garbage lol good luck!! love u 
+ 
 target_FPA(6)=10;
 for i =1:1:12
     fpa = target_FPA(i);
@@ -1479,27 +1272,7 @@ for i =1:1:12
     
     y_FDA_COP = zeros(shape,100);
     x_FDA_COP = zeros(shape,100);
-    
-%     for ii = 1:1:100
-%         
-%         mdl = fitlm(linspace(1,shape,shape), KJCy_offset(:,ii));
-%         y_FDA_KJC(:, ii) = mdl.Fitted;
-%         y_FDA_KJC_R2(i,ii) = mdl.Rsquared.Ordinary;
-%         
-%         mdl = fitlm(linspace(1,shape,shape), KJCx_offset(:,ii));
-%         x_FDA_KJC(:, ii) = mdl.Fitted;
-%         x_FDA_KJC_R2(i,ii) = mdl.Rsquared.Ordinary;
-%         
-%         
-%         mdl = fitlm(linspace(1,shape,shape), COPy_offset(:,ii));
-%         y_FDA_COP(:, ii) = mdl.Fitted;
-%         y_FDA_COP_R2(i,ii) = mdl.Rsquared.Ordinary;
-%         
-%         mdl = fitlm(linspace(1,shape,shape), COPx_offset(:,ii));
-%         x_FDA_COP(:, ii) = mdl.Fitted;
-%         x_FDA_COP_R2(i,ii) = mdl.Rsquared.Ordinary;
-%         
-%     end
+
     
     
     % testing if i can remove regressions:
@@ -1536,9 +1309,7 @@ for i =1:1:12
     
     r = pred_cop_g/1000 - pred_kjc_g/1000;
     KM = cross(r, pred_grf);
-    %plot(-KM(1,:)/(subjectHeightsWeights(i,2)*subjectHeightsWeights(i,3)/100)*10)
-    %plot((-KM(1,:)/(subjectHeightsWeights(i,2)*subjectHeightsWeights(i,3)/100*9.8))*100)
-    %KAM_fda(i,:) = (-KM(1,:)/(subjectHeightsWeights(i,2)*subjectHeightsWeights(i,3)/100)*10);
+
     KAM_fda(i,:) = (-KM(1,:)/(subjectHeightsWeights(i,2)*subjectHeightsWeights(i,3)/100*9.8))*100;
     
     % 06.24.21 calculating rmse
@@ -1742,62 +1513,6 @@ p3 = plot(mean(KAM_fda), 'LineWidth', 3);
 p1.Color = [1 0 0];
 p2.Color = [0 1 0];
 p3.Color = [0 0 1];
-
-%% calculate FP RMSE by hand 
-for i = 2%1:1:12
-    figure; hold on;
-    plot(KAM_base(i,:))
-    plot(KAM_toein(i,:))
-    plot(KAM_fda(i,:))
-    legend('baseline', 'toein', 'fda')
-end
-
-
-%%
-figure
-hold on
-[pks1, locs1 ] = findpeaks(mean(KAM_toein), 'MinPeakDistance', 30);
-[pks2, locs2 ] = findpeaks(mean(KAM_lin), 'MinPeakDistance', 30);
-[pks3, locs3 ] = findpeaks(mean(KAM_fda), 'MinPeakDistance', 30);
-findpeaks(mean(KAM_toein), 'MinPeakDistance', 30);
-findpeaks(mean(KAM_lin), 'MinPeakDistance', 30);
-findpeaks(mean(KAM_fda), 'MinPeakDistance', 30);
-text(locs1-1, pks1-1, num2str(pks1))
-text(locs2+1, pks2+0.5, num2str(pks2))
-text(locs2+1, pks2-0.5, num2str(pks3))
-
-
-
-
-%% WHYYYYYYYYYYYYYYYYYYY
-bmean = 0;
-tmean = 0;
-bmean2 = 0;
-tmean2 = 0;
-bmean3 = 0;
-tmean3 = 0;
-for i =1:1:12
-    for j = 1:1:10
-        bmean=store_KAM_baseline_debug{i,j}+bmean;
-        bmean2 = store_KAM_baseline_debug2{i,j}+bmean2;
-        bmean3 = store_KAM_baseline_debug3{i,j}+bmean3;
-        tmean =store_KAM_trial_debug{i,j}+tmean;
-        tmean2 =store_KAM_trial_debug2{i,j}+tmean2;
-        tmean3 =store_KAM_trial_debug3{i,j}+tmean3;
-    end
-end
-
-figure
-hold on
-plot(-bmean./12)
-plot(-tmean./12)
-plot(-bmean2./12)
-plot(-tmean2./12)
-plot(bmean3./12)
-plot(tmean3./12)
-
-legend('nrb','nrt','gtb','gtt','tcsb','tcst')
-
 
 
 
