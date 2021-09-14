@@ -8,7 +8,8 @@ Although foot progression angle gait retraining is overall beneficial as a conse
 
 ## Getting started:
 Data are freely available for download at: https://simtk.org/projects/predict-kam  
-With the exception of a functional data analysis component for smoothing toe-in patterns (Python), all data and code runs in MATLAB.
+With the exception of a functional data analysis (FDA) component for smoothing toe-in patterns (Python), all data and code runs in MATLAB.
+For running FDA, refer to scikit-FDA documentation for installation: https://fda.readthedocs.io/en/latest/
 
 Scripts for processing each institution's data are contained in the folders by their name.  
 The trained predictive model and learned toe-in patterns to generate synthetic toe-in gait are shared in the Models folder. 
