@@ -9,7 +9,7 @@ Although foot progression angle gait retraining is overall beneficial as a conse
 
 
 
-![Description of Data and Methods](Figures/Fig2_processDiagram.png?raw=true)
+![Description of Data and Methods](Figures/Fig2_processDiagram_small.png?raw=true)
 
 ## Getting started:
 Data are freely available for download at: https://simtk.org/projects/predict-kam  
